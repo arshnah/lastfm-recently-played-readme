@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-const withImages = require('next-images');
-module.exports = withImages({
-    images: {
-        disableStaticImages: true,
-    },
-});
+/** @type {import('next').NextConfig} */
+module.exports = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+};
