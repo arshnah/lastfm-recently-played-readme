@@ -1,28 +1,28 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 function escapeXml(str: string): string {
   return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
 }
 
 function truncate(str: string, maxLen: number): string {
-  return str.length > maxLen ? str.slice(0, maxLen) + "…" : str;
+  return str.length > maxLen ? str.slice(0, maxLen) + '…' : str;
 }
 
 interface LastFmImage {
   size?: string;
-  "#text"?: string;
+  '#text'?: string;
 }
 
 interface LastFmTrack {
-  "@attr"?: { nowplaying?: string };
+  '@attr'?: { nowplaying?: string };
   name?: string;
-  artist?: { "#text"?: string };
-  album?: { "#text"?: string };
+  artist?: { '#text'?: string };
+  album?: { '#text'?: string };
   image?: LastFmImage[];
 }
 
@@ -40,7 +40,7 @@ export default async function handler(
   const API_KEY = process.env.API_KEY;
 
   if (!user || !API_KEY) {
-    res.status(400).send("Missing user or API_KEY");
+    res.status(400).send('Missing user or API_KEY');
     return;
   }
 
@@ -52,28 +52,28 @@ export default async function handler(
     const track = lfmData.recenttracks?.track?.[0];
 
     if (!track) {
-      res.status(404).send("No tracks found");
+      res.status(404).send('No tracks found');
       return;
     }
 
-    const isPlaying = track["@attr"]?.nowplaying === "true";
-    const trackName = escapeXml(track.name ?? "Unknown");
-    const artistName = escapeXml(track.artist?.["#text"] ?? "Unknown");
-    const albumName = escapeXml(track.album?.["#text"] ?? "");
+    const isPlaying = track['@attr']?.nowplaying === 'true';
+    const trackName = escapeXml(track.name ?? 'Unknown');
+    const artistName = escapeXml(track.artist?.['#text'] ?? 'Unknown');
+    const albumName = escapeXml(track.album?.['#text'] ?? '');
 
     const images = track.image ?? [];
     const artUrl =
-      images.find((i) => i.size === "extralarge")?.["#text"] ??
-      images.find((i) => i.size === "large")?.["#text"] ??
-      "";
+      images.find((i) => i.size === 'extralarge')?.['#text'] ??
+      images.find((i) => i.size === 'large')?.['#text'] ??
+      '';
 
-    const DEFAULT_ART = "2a96cbd8b46e442fc41c2b86b821562f";
-    let artBase64 = "";
+    const DEFAULT_ART = '2a96cbd8b46e442fc41c2b86b821562f';
+    let artBase64 = '';
 
     if (artUrl && !artUrl.includes(DEFAULT_ART)) {
       try {
         const artBuf = await (await fetch(artUrl)).arrayBuffer();
-        artBase64 = `data:image/jpeg;base64,${Buffer.from(artBuf).toString("base64")}`;
+        artBase64 = `data:image/jpeg;base64,${Buffer.from(artBuf).toString('base64')}`;
       } catch (_) {
         // no art available
       }
@@ -109,11 +109,11 @@ export default async function handler(
   <text x="${W - 14}" y="${H - 8}" font-family="Segoe UI,Arial,sans-serif" font-size="10" fill="#333" text-anchor="end">last.fm</text>
 </svg>`;
 
-    res.setHeader("Content-Type", "image/svg+xml");
-    res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=30");
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=30');
     res.send(svg);
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error");
+    res.status(500).send('Error');
   }
 }
